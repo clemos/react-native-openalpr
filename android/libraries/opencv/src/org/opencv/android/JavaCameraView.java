@@ -95,6 +95,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                 Log.d(TAG, "Trying to open camera with old open()");
                 try {
                     mCamera = Camera.open();
+                    mLocalCameraIndex = 0;
                 }
                 catch (Exception e){
                     Log.e(TAG, "Camera is not available (in use or does not exist): " + e.getLocalizedMessage());
@@ -107,6 +108,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                         try {
                             mCamera = Camera.open(camIdx);
                             connected = true;
+                            mLocalCameraIndex = camIdx;
                         } catch (RuntimeException e) {
                             Log.e(TAG, "Camera #" + camIdx + "failed to open: " + e.getLocalizedMessage());
                         }
@@ -149,6 +151,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                             Log.e(TAG, "Camera #" + localCameraIndex + "failed to open: " + e.getLocalizedMessage());
                         }
                     }
+                    mLocalCameraIndex = localCameraIndex;
                 }
             }
 

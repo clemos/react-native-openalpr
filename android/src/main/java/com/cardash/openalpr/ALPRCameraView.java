@@ -6,6 +6,7 @@ import android.content.ContextWrapper;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Area;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
@@ -22,12 +23,12 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Core;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-
 
 public class ALPRCameraView extends JavaCameraView implements ICameraView {
 
@@ -50,7 +51,7 @@ public class ALPRCameraView extends JavaCameraView implements ICameraView {
     }
 
     public ALPRCameraView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        super(context, attrs);    
     }
 
 
@@ -77,6 +78,10 @@ public class ALPRCameraView extends JavaCameraView implements ICameraView {
             @Override
             public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
                 Mat rgba = inputFrame.rgba();
+
+                if (isFlipped()) {
+                    Core.flip(rgba, rgba, 0);
+                }
 
                 if (callback != null) {
                     ALPR.getInstance().process(rgba, country, rotation, new ALPR.ResultsCallback() {
@@ -167,6 +172,7 @@ public class ALPRCameraView extends JavaCameraView implements ICameraView {
         if (lowResolution.equals(highResolution)) {
             lowResolution = mediumResolution;
         }
+
         applyQuality(quality);
     }
 
@@ -362,6 +368,7 @@ public class ALPRCameraView extends JavaCameraView implements ICameraView {
         if (context == null) return;
         Activity activity = scanForActivity(context);
         if (activity == null) return;
+
         activity.setRequestedOrientation(isLandscape
                 ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

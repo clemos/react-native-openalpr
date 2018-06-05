@@ -20,12 +20,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Matrix;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.hardware.Camera.CameraInfo;
+import android.hardware.Camera;
 
 /**
  * This is a basic class, implementing the interaction with Camera and OpenCV library.
@@ -57,6 +60,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected float mScale = 0;
     protected int mPreviewFormat = RGBA;
     protected int mCameraIndex = CAMERA_ID_ANY;
+    protected int mLocalCameraIndex = -1;
     protected boolean mEnabled;
     protected FpsMeter mFpsMeter = null;
 
@@ -409,10 +413,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         } else {
             modified = frame.rgba();
         }
+        
 
         if (getOrientation() == Configuration.ORIENTATION_PORTRAIT) {
             // long time = System.currentTimeMillis();
-            if (getScreenRotation() == Surface.ROTATION_180) {
+            if (isFlipped() || getScreenRotation() == Surface.ROTATION_180) {
                 Core.transpose(modified, modified);
                 Core.flip(modified, modified, -1);
             } else {
@@ -444,7 +449,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                 canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
                 //Log.d(TAG, "mStretch value: " + mScale);
                 //Log.i(TAG, "size " + canvas.getWidth() + " " + canvas.getHeight() + " " + mCacheBitmap.getWidth() + " " + mCacheBitmap.getHeight());
-
+                
                 /*if (mScale != 0) {
                     canvas.drawBitmap(mCacheBitmap, new Rect(0,0,mCacheBitmap.getWidth(), mCacheBitmap.getHeight()),
                          new Rect((int)((canvas.getWidth() - mScale*mCacheBitmap.getWidth()) / 2),
@@ -620,5 +625,12 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
 
         //return new Size(calcWidth, calcHeight);
+    }
+
+    protected boolean isFlipped() {
+        CameraInfo info = new CameraInfo();
+        Camera.getCameraInfo(mLocalCameraIndex, info);
+        int cameraOrientation = info.orientation;
+        return cameraOrientation == 270;
     }
 }
