@@ -163,6 +163,7 @@ public class ALPRCameraView extends JavaCameraView implements ICameraView {
         ListIterator<Size> resolutionItr = resolutionList.listIterator();
         while (resolutionItr.hasNext()) {
             Size s = resolutionItr.next();
+            Log.d(TAG, "Resolution : " + s.width + "x" + s.height);
             if (s.width < highResolution.width && s.height < highResolution.height && mediumResolution.equals(highResolution)) {
                 mediumResolution = s;
             } else if (s.width < mediumResolution.width && s.height < mediumResolution.height) {
@@ -179,6 +180,7 @@ public class ALPRCameraView extends JavaCameraView implements ICameraView {
     private void setResolution(Size resolution) {
         if (resolution == null) return;
         disconnectCamera();
+        Log.d(TAG, "applying resolution " + resolution.width+" x "+resolution.height);
         mMaxHeight = resolution.height;
         mMaxWidth = resolution.width;
         connectCamera(getWidth(), getHeight());

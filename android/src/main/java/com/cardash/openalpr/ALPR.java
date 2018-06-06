@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.os.Environment;
+
 public class ALPR {
     private static final String TAG = ALPR.class.getSimpleName();
     private static ALPR instance;
@@ -99,6 +101,8 @@ public class ALPR {
         // image is need to have proper orientation before delivering to openalpr for recognition
         applyOrientation(m, true, rotation);
 
+        Log.d(TAG, "image size: " + m.cols() + "x" + m.rows());
+
         // path to openalpr config file in android environment
         final String androidDataDir = ctx.getApplicationInfo().dataDir;
         final String openAlprConfFile = androidDataDir + File.separatorChar + "runtime_data" + File.separatorChar + "openalpr.conf";
@@ -111,6 +115,7 @@ public class ALPR {
         m.release();
         File file = saveToInternalStorage(bm, ctx);
         if (file == null) {
+            Log.i(TAG, "Couldn't save to internal storage");
             finishExecution(ctx, callback);
             return;
         }
@@ -232,10 +237,15 @@ public class ALPR {
      * returns File ref. to internally saved image
      */
     private static File saveToInternalStorage(Bitmap bitmapImage, Context context) {
+
+        // saveImage(bitmapImage, "test-selfy");
+        
         ContextWrapper cw = new ContextWrapper(context.getApplicationContext());
         // path to /data/data/com.awesomeproject/app_data/imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         File mypath = new File(directory, "frame.jpg");
+
+        Log.d(TAG, "path : " + mypath );
 
         FileOutputStream fos = null;
         try {
@@ -251,5 +261,25 @@ public class ALPR {
             }
         }
         return mypath;
+    }
+
+    private static void saveImage(Bitmap finalBitmap, String image_name) {
+
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root);
+        myDir.mkdirs();
+        String fname = "Image-" + image_name+ ".jpg";
+        File file = new File(myDir, fname);
+        Log.d(TAG, "saving file to " + myDir);
+        if (file.exists()) file.delete();
+        Log.i("LOAD", root + fname);
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
